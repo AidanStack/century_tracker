@@ -15,24 +15,30 @@
             </form>
         </div>
 
-        <div class="habit-count-display">
-            <span class="count-main">{{ habit.count }}</span>
-            <span class="count-suffix">/100</span>
-        </div>
+        <div class="habit-body">
+            <div class="habit-content">
+                <div class="habit-count-display">
+                    <span class="count-main">{{ habit.count }}</span>
+                    <span class="count-suffix">/100</span>
+                </div>
 
-        <div class="dot-grid">
-            {% for i in range(100) %}
-            <div class="dot {% if i < habit.count %}filled{% endif %}"></div>
-            {% endfor %}
-        </div>
+                <div class="dot-grid">
+                    {% for i in range(100) %}
+                    <div class="dot {% if i < habit.count %}filled{% endif %}"></div>
+                    {% endfor %}
+                </div>
+            </div>
 
-        <div class="toggle-container">
-            <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;">
-                <button type="submit" class="toggle-switch {% if habit.completed_today %}active{% endif %}">
-                    <div class="toggle-slider"></div>
-                </button>
-            </form>
-            <span class="toggle-label">Today</span>
+            <div class="habit-toggle">
+                <div class="toggle-container">
+                    <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;">
+                        <button type="submit" class="toggle-switch {% if habit.completed_today %}active{% endif %}">
+                            <div class="toggle-slider"></div>
+                        </button>
+                    </form>
+                    <span class="toggle-label">Today</span>
+                </div>
+            </div>
         </div>
     </div>
     {% endfor %}

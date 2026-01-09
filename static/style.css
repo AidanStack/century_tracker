@@ -33,9 +33,13 @@ header {
 }
 
 header h1 {
-    font-size: 1.2rem;
+    font-family: 'Lora', serif;
+    font-size: 1.5rem;
     font-weight: 400;
-    color: var(--text-light);
+    font-style: italic;
+    color: #ffffff;
+    opacity: 1;
+    text-align: center;
     letter-spacing: 0.5px;
 }
 
@@ -59,13 +63,31 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.habit-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+}
+
+.habit-content {
+    flex: 1;
+}
+
+.habit-toggle {
+    display: flex;
+    align-items: center;
 }
 
 .habit-name {
-    font-size: 1rem;
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
     font-weight: 400;
-    color: var(--text-white);
+    color: #ffffff;
+    opacity: 1;
 }
 
 /* Delete X button */
@@ -111,9 +133,9 @@ main {
 /* Dot grid */
 .dot-grid {
     display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    gap: 3px;
-    max-width: 220px;
+    grid-template-columns: repeat(20, 1fr);
+    gap: 4px;
+    max-width: 440px;
     margin-bottom: 1rem;
 }
 
@@ -121,20 +143,22 @@ main {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: var(--dot-empty);
-    border: 1px solid rgba(255,255,255,0.1);
+    background-color: transparent;
+    border: 1px solid #ffffff;
+    aspect-ratio: 1;
 }
 
 .dot.filled {
-    background-color: var(--dot-filled);
-    border-color: var(--dot-filled);
+    background-color: #ffffff;
+    border-color: #ffffff;
 }
 
 /* Toggle switch */
 .toggle-container {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
 }
 
 .toggle-label {
