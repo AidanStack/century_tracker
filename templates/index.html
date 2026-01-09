@@ -6,11 +6,11 @@
     <div class="habit-card">
         <div class="habit-header">
             <a href="{{ url_for('habit_detail', habit_id=habit.habit_id) }}" class="habit-name">{{ habit.habit_name }}</a>
-            <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;">
+            <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;" onsubmit="return false;">
                 <input type="checkbox"
                        class="habit-checkbox"
                        {% if habit.completed_today %}checked{% endif %}
-                       onchange="this.form.submit()">
+                       onchange="toggleHabit({{ habit.habit_id }}, this)">
             </form>
         </div>
 
@@ -35,4 +35,43 @@
 {% endif %}
 
 <a href="{{ url_for('add_habit') }}" class="btn add-habit-btn">Add a Habit</a>
+
+<script>
+function toggleHabit(habitId, checkbox) {
+    fetch(`/toggle-habit/${habitId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            // If the request failed, revert the checkbox
+            checkbox.checked = !checkbox.checked;
+            alert('Failed to update habit. Please try again.');
+        } else {
+            // Update the UI after successful toggle
+            const habitCard = checkbox.closest('.habit-card');
+            const countElement = habitCard.querySelector('.count-main');
+            const dotGrid = habitCard.querySelector('.dot-grid');
+            const firstDot = dotGrid.querySelector('.dot:first-child');
+
+            // Update the count
+            let currentCount = parseInt(countElement.textContent);
+            if (checkbox.checked) {
+                countElement.textContent = currentCount + 1;
+                firstDot.classList.add('filled');
+            } else {
+                countElement.textContent = currentCount - 1;
+                firstDot.classList.remove('filled');
+            }
+        }
+    })
+    .catch(error => {
+        // If there's an error, revert the checkbox
+        checkbox.checked = !checkbox.checked;
+        alert('Failed to update habit. Please try again.');
+    });
+}
+</script>
 {% endblock %}

@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 
 {% block content %}
+<style>
+    header {
+        display: none;
+    }
+</style>
+
 <div class="detail-header">
     <a href="{{ url_for('index') }}" class="back-link">← Back</a>
-    <button class="edit-habit-btn" onclick="openEditModal()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-        </svg>
-        <span>Edit</span>
-    </button>
 </div>
+
+<h1 class="habit-detail-title">{{ habit.habit_name }}</h1>
 
 <!-- Edit Modal -->
 <div id="editModal" class="modal" onclick="closeModalOnBackdrop(event)">
     <div class="modal-content">
-        <h2>Edit Habit</h2>
-
+        <button type="button" class="modal-close" onclick="closeEditModal()">×</button>
         <form method="POST" action="{{ url_for('rename_habit_route', habit_id=habit.habit_id) }}">
             <label for="habit_name">Habit Name</label>
             <input
@@ -30,7 +30,6 @@
 
             <div class="modal-actions">
                 <button type="submit" class="btn btn-primary">Save Changes</button>
-                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
             </div>
         </form>
 
@@ -57,17 +56,53 @@ function closeModalOnBackdrop(event) {
         closeEditModal();
     }
 }
+
+function toggleHabit(habitId, checkbox) {
+    fetch(`/toggle-habit/${habitId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            // If the request failed, revert the checkbox
+            checkbox.checked = !checkbox.checked;
+            alert('Failed to update habit. Please try again.');
+        } else {
+            // Update the UI after successful toggle
+            const habitCard = checkbox.closest('.habit-card');
+            const countElement = habitCard.querySelector('.count-main');
+            const dotGrid = habitCard.querySelector('.dot-grid');
+            const firstDot = dotGrid.querySelector('.dot:first-child');
+
+            // Update the count
+            let currentCount = parseInt(countElement.textContent);
+            if (checkbox.checked) {
+                countElement.textContent = currentCount + 1;
+                firstDot.classList.add('filled');
+            } else {
+                countElement.textContent = currentCount - 1;
+                firstDot.classList.remove('filled');
+            }
+        }
+    })
+    .catch(error => {
+        // If there's an error, revert the checkbox
+        checkbox.checked = !checkbox.checked;
+        alert('Failed to update habit. Please try again.');
+    });
+}
 </script>
 
 <div class="habit-card">
     <div class="habit-header">
-        <div class="habit-name-static">{{ habit.habit_name }}</div>
-        <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;">
+        <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;" onsubmit="return false;">
             <input type="hidden" name="next" value="{{ url_for('habit_detail', habit_id=habit.habit_id) }}">
             <input type="checkbox"
                    class="habit-checkbox"
                    {% if habit.completed_today %}checked{% endif %}
-                   onchange="this.form.submit()">
+                   onchange="toggleHabit({{ habit.habit_id }}, this)">
         </form>
     </div>
 
@@ -84,4 +119,6 @@ function closeModalOnBackdrop(event) {
         </div>
     </div>
 </div>
+
+<button class="edit-habit-btn-bottom" onclick="openEditModal()">Edit Habit</button>
 {% endblock %}
