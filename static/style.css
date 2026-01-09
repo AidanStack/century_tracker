@@ -44,27 +44,45 @@ header h1 {
 }
 
 main {
-    max-width: 550px;
+    max-width: 632.5px;
     margin: 0 auto;
     padding: 0;
+}
+
+.habit-cards-container {
+    /* Container for habit cards to isolate drag and drop */
 }
 
 /* Habit cards */
 .habit-card {
     background: transparent;
     border: none;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
+    padding: 1.8rem;
+    margin-bottom: 1.2rem;
     position: relative;
     cursor: move;
     transition: opacity 0.2s, background 0.2s, backdrop-filter 0.2s, box-shadow 0.2s;
-    border-radius: 12px;
+    border-radius: 14.4px;
     backdrop-filter: blur(0px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0);
 }
 
-.habit-card:hover {
-    background: rgba(255, 255, 255, 0.02);
+.habit-card::before {
+    content: '';
+    position: absolute;
+    top: -0.6rem;
+    left: 5%;
+    width: 90%;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.habit-card:first-child::before {
+    display: none;
+}
+
+.habit-cards-container.is-dragging .habit-card {
+    background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(10px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -77,8 +95,8 @@ main {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 0.35rem;
-    margin-bottom: 1.25rem;
+    gap: calc(0.42rem + 2px);
+    margin-bottom: 1.125rem;
 }
 
 .habit-header form {
@@ -90,7 +108,7 @@ main {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 2rem;
+    gap: 2.4rem;
 }
 
 .habit-toggle {
@@ -100,7 +118,7 @@ main {
 
 .habit-name {
     font-family: 'Lora', serif;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 400;
     color: #ffffff;
     opacity: 1;
@@ -118,15 +136,16 @@ main {
 .habit-checkbox {
     appearance: none;
     -webkit-appearance: none;
-    width: 20px;
-    height: 20px;
+    width: 21.6px;
+    height: 21.6px;
     cursor: pointer;
     border: 2px solid rgba(255, 255, 255, 0.4);
-    border-radius: 4px;
+    border-radius: 4.32px;
     background-color: transparent;
     position: relative;
     transition: all 0.2s;
     flex-shrink: 0;
+    margin-top: 4px;
 }
 
 .habit-checkbox:checked {
@@ -137,12 +156,12 @@ main {
 .habit-checkbox:checked::after {
     content: '';
     position: absolute;
-    left: 5px;
-    top: 2px;
-    width: 4px;
-    height: 8px;
+    left: 5.4px;
+    top: 2.16px;
+    width: 4.32px;
+    height: 8.64px;
     border: solid var(--dot-filled);
-    border-width: 0 2px 2px 0;
+    border-width: 0 2.16px 2.16px 0;
     transform: rotate(45deg);
 }
 
@@ -154,6 +173,19 @@ main {
     margin-bottom: 1.75rem;
 }
 
+.habit-detail-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.habit-detail-title-row form {
+    display: flex;
+    align-items: center;
+}
+
 .habit-detail-title {
     font-family: 'Lora', serif;
     font-size: 2.25rem;
@@ -163,18 +195,19 @@ main {
     opacity: 1;
     text-align: left;
     letter-spacing: 0.5px;
-    margin-bottom: 1rem;
+    margin: 0;
+    line-height: 1;
 }
 
 .back-link {
     font-family: 'Lora', serif;
-    color: var(--text-light);
+    color: rgba(255, 255, 255, 0.4);
     text-decoration: none;
     font-size: 1rem;
 }
 
 .back-link:hover {
-    color: var(--text-white);
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .edit-habit-btn {
@@ -205,7 +238,7 @@ main {
     padding: 0.75rem 1.5rem;
     cursor: pointer;
     color: rgba(255, 255, 255, 0.4);
-    transition: background 0.2s, backdrop-filter 0.2s, box-shadow 0.2s, color 0.2s;
+    transition: color 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -214,14 +247,9 @@ main {
     margin: 2rem auto;
     text-decoration: none;
     border-radius: 12px;
-    backdrop-filter: blur(0px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0);
 }
 
 .edit-habit-btn-bottom:hover {
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     color: rgba(255, 255, 255, 0.6);
 }
 
@@ -271,9 +299,25 @@ main {
     transition: all 0.2s;
 }
 
+.detail-habit-checkbox::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 3px;
+    width: 6px;
+    height: 12px;
+    border: solid rgba(255, 255, 255, 0.15);
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}
+
 .detail-habit-checkbox:checked {
     background-color: #ffffff;
     border-color: #ffffff;
+}
+
+.detail-habit-checkbox:checked::before {
+    display: none;
 }
 
 .detail-habit-checkbox:checked::after {
@@ -290,15 +334,13 @@ main {
 
 .detail-dot-grid {
     display: grid;
-    grid-template-columns: repeat(20, 16px);
-    gap: 8px;
-    margin: 0 auto 2rem;
-    justify-content: center;
+    grid-template-columns: repeat(20, 12.8px);
+    gap: 6.4px;
 }
 
 .detail-dot {
-    width: 16px;
-    height: 16px;
+    width: 12.8px;
+    height: 12.8px;
     border-radius: 50%;
     background-color: transparent;
     border: 1px solid #ffffff;
@@ -333,31 +375,31 @@ main {
 }
 
 .count-main {
-    font-size: 3rem;
+    font-size: 3.6rem;
     font-weight: 300;
     color: var(--text-white);
     line-height: 1;
 }
 
 .count-suffix {
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     color: var(--text-light);
     position: absolute;
-    bottom: 0.3rem;
-    margin-left: 0.2rem;
+    bottom: 0.36rem;
+    margin-left: 0.24rem;
 }
 
 /* Dot grid */
 .dot-grid {
     display: grid;
-    grid-template-columns: repeat(20, 12px);
-    gap: 4px;
+    grid-template-columns: repeat(20, 12.96px);
+    gap: 4.32px;
     margin-left: auto;
 }
 
 .dot {
-    width: 12px;
-    height: 12px;
+    width: 12.96px;
+    height: 12.96px;
     border-radius: 50%;
     background-color: transparent;
     border: 1px solid #ffffff;
@@ -431,16 +473,11 @@ main {
     width: fit-content;
     margin-left: auto;
     margin-right: auto;
-    transition: background 0.2s, backdrop-filter 0.2s, box-shadow 0.2s, color 0.2s;
+    transition: color 0.2s;
     border-radius: 12px;
-    backdrop-filter: blur(0px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0);
 }
 
 .add-habit-btn:hover {
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     color: rgba(255, 255, 255, 0.6);
 }
 

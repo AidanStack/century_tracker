@@ -1,17 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="habit-cards-container">
 {% if habits %}
     {% for habit in habits %}
     <div class="habit-card" draggable="true" data-habit-id="{{ habit.habit_id }}">
         <div class="habit-header">
-            <a href="{{ url_for('habit_detail', habit_id=habit.habit_id) }}" class="habit-name">{{ habit.habit_name }}</a>
             <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;" onsubmit="return false;">
                 <input type="checkbox"
                        class="habit-checkbox"
                        {% if habit.completed_today %}checked{% endif %}
                        onchange="toggleHabit({{ habit.habit_id }}, this)">
             </form>
+            <a href="{{ url_for('habit_detail', habit_id=habit.habit_id) }}" class="habit-name">{{ habit.habit_name }}</a>
         </div>
 
         <div class="habit-body">
@@ -35,6 +36,7 @@
         <p>No habits yet!</p>
     </div>
 {% endif %}
+</div>
 
 <a href="{{ url_for('add_habit') }}" class="btn add-habit-btn">Add a Habit</a>
 
@@ -93,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function handleDragStart(e) {
     draggedElement = this;
     this.classList.add('dragging');
+    document.querySelector('.habit-cards-container').classList.add('is-dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', this.innerHTML);
 }
@@ -103,11 +106,12 @@ function handleDragOver(e) {
     }
     e.dataTransfer.dropEffect = 'move';
 
-    const afterElement = getDragAfterElement(this.parentNode, e.clientY);
+    const container = document.querySelector('.habit-cards-container');
+    const afterElement = getDragAfterElement(container, e.clientY);
     if (afterElement == null) {
-        this.parentNode.appendChild(draggedElement);
+        container.appendChild(draggedElement);
     } else {
-        this.parentNode.insertBefore(draggedElement, afterElement);
+        container.insertBefore(draggedElement, afterElement);
     }
 
     return false;
@@ -122,6 +126,7 @@ function handleDrop(e) {
 
 function handleDragEnd(e) {
     this.classList.remove('dragging');
+    document.querySelector('.habit-cards-container').classList.remove('is-dragging');
 
     // Get the new order of habit IDs
     const habitCards = document.querySelectorAll('.habit-card');
