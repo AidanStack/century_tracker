@@ -108,6 +108,42 @@ def get_habit_by_id(habit_id: int) -> Optional[Dict]:
         conn.close()
 
 
+def rename_habit(habit_id: int, new_name: str) -> bool:
+    """
+    Rename a habit.
+
+    Args:
+        habit_id: The ID of the habit to rename
+        new_name: The new name for the habit
+
+    Returns:
+        True if renamed successfully, False otherwise
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE habits
+            SET habit_name = ?
+            WHERE habit_id = ?
+        """, (new_name, habit_id))
+
+        conn.commit()
+        updated = cursor.rowcount > 0
+        if updated:
+            print(f"Renamed habit {habit_id} to '{new_name}'")
+        return updated
+
+    except sqlite3.Error as e:
+        print(f"Error renaming habit: {e}")
+        conn.rollback()
+        return False
+
+    finally:
+        conn.close()
+
+
 def delete_habit(habit_id: int) -> bool:
     """
     Delete a habit and log deletion event. Historical event data is preserved.

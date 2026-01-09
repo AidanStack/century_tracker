@@ -12,7 +12,8 @@ from models import (
     mark_habit_incomplete,
     get_habit_date_status,
     delete_habit,
-    get_habit_100day_history
+    get_habit_100day_history,
+    rename_habit
 )
 
 
@@ -60,6 +61,11 @@ def toggle_habit(habit_id):
     else:
         mark_habit_complete(habit_id)
 
+    # Check if there's a redirect URL in the form data
+    next_url = request.form.get('next')
+    if next_url:
+        return redirect(next_url)
+
     return redirect(url_for('index'))
 
 
@@ -77,6 +83,15 @@ def habit_detail(habit_id):
     habit['history'] = get_habit_100day_history(habit_id, today)
 
     return render_template('habit_detail.html', habit=habit)
+
+
+@app.route('/rename-habit/<int:habit_id>', methods=['POST'])
+def rename_habit_route(habit_id):
+    """Rename a habit."""
+    new_name = request.form.get('habit_name')
+    if new_name:
+        rename_habit(habit_id, new_name)
+    return redirect(url_for('habit_detail', habit_id=habit_id))
 
 
 @app.route('/delete-habit/<int:habit_id>', methods=['POST'])
