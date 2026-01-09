@@ -194,7 +194,7 @@ main {
 
 .habit-detail-title {
     font-family: 'Lora', serif;
-    font-size: 1.5rem;
+    font-size: 1.452rem;
     font-weight: 400;
     color: #ffffff;
     opacity: 1;
@@ -257,6 +257,65 @@ main {
 
 .edit-habit-btn-bottom:hover {
     color: rgba(255, 255, 255, 0.6);
+}
+
+/* Trend graph */
+.trend-graph-container {
+    max-width: 506px;
+    margin: 3rem auto 0;
+    padding: 0;
+    position: relative;
+}
+
+.trend-graph-container::before {
+    content: '';
+    position: absolute;
+    top: -1.5rem;
+    left: -12.5%;
+    width: 125%;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.trend-title {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.trend-period-select {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    padding: 0 0.25rem;
+    margin-right: 0.25rem;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.trend-period-select:hover {
+    border-bottom-color: rgba(255, 255, 255, 0.6);
+}
+
+.trend-period-select:focus {
+    border-bottom-color: rgba(255, 255, 255, 0.8);
+}
+
+.trend-title-text {
+    font-family: 'Lora', serif;
+}
+
+.trend-graph {
+    width: 100%;
+    height: 360px;
 }
 
 .edit-habit-btn svg,
@@ -515,8 +574,8 @@ input[type="text"] {
     min-height: 44px;
     padding: 0.75rem;
     font-size: 16px;
-    background-color: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.2);
+    background-color: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 8px;
     color: #ffffff;
     opacity: 1;
@@ -526,7 +585,7 @@ input[type="text"] {
 input[type="text"]:focus {
     outline: none;
     border-color: var(--dot-filled);
-    background-color: rgba(255,255,255,0.08);
+    background-color: transparent;
 }
 
 input[type="text"]::placeholder {
@@ -655,7 +714,7 @@ input[type="text"]::placeholder {
 .modal-content input[type="text"]:focus {
     outline: none;
     border-color: var(--dot-filled);
-    background-color: rgba(255,255,255,0.08);
+    background-color: transparent;
 }
 
 .modal-actions {
@@ -731,7 +790,7 @@ input[type="text"]::placeholder {
     }
 
     .habit-detail-title {
-        font-size: 2.475rem;
+        font-size: 1.452rem;
     }
 
     .count-main {

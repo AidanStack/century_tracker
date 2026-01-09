@@ -13,6 +13,7 @@ from models import (
     get_habit_date_status,
     delete_habit,
     get_habit_100day_history,
+    get_habit_trend_data,
     rename_habit,
     update_habit_order
 )
@@ -79,9 +80,17 @@ def habit_detail(habit_id):
     if not habit:
         return redirect(url_for('index'))
 
+    # Get trend period from query parameter (default 100)
+    period = request.args.get('period', 100, type=int)
+    # Limit period to valid options
+    if period not in [100, 200, 300, 365, 400, 500]:
+        period = 100
+
     today = date.today()
     habit['completed_today'] = get_habit_date_status(habit_id, today)
     habit['history'] = get_habit_100day_history(habit_id, today)
+    habit['trend'] = get_habit_trend_data(habit_id, today, period)
+    habit['trend_period'] = period
 
     return render_template('habit_detail.html', habit=habit)
 

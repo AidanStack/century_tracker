@@ -120,5 +120,64 @@ function toggleHabit(habitId, checkbox) {
 </div>
 </div>
 
+<div class="trend-graph-container">
+    <div class="trend-title">
+        <select id="trendPeriod" class="trend-period-select" onchange="updateTrendPeriod({{ habit.habit_id }})">
+            <option value="100" {% if habit.trend_period == 100 %}selected{% endif %}>100</option>
+            <option value="200" {% if habit.trend_period == 200 %}selected{% endif %}>200</option>
+            <option value="300" {% if habit.trend_period == 300 %}selected{% endif %}>300</option>
+            <option value="365" {% if habit.trend_period == 365 %}selected{% endif %}>365</option>
+            <option value="400" {% if habit.trend_period == 400 %}selected{% endif %}>400</option>
+            <option value="500" {% if habit.trend_period == 500 %}selected{% endif %}>500</option>
+        </select>
+        <span class="trend-title-text">Day Trend</span>
+    </div>
+    <svg class="trend-graph" viewBox="-40 0 640 300" preserveAspectRatio="xMidYMid meet">
+        <!-- Define gradient -->
+        <defs>
+            <linearGradient id="trendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:white;stop-opacity:0.4" />
+                <stop offset="100%" style="stop-color:white;stop-opacity:0" />
+            </linearGradient>
+        </defs>
+
+        <!-- Y-axis line -->
+        <line x1="0" y1="0" x2="0" y2="300" stroke="rgba(255,255,255,0.5)" stroke-width="4"/>
+
+        <!-- X-axis line -->
+        <line x1="0" y1="300" x2="600" y2="300" stroke="rgba(255,255,255,0.5)" stroke-width="4"/>
+
+        <!-- Y-axis labels -->
+        <text x="-10" y="20" fill="#ffffff" font-size="20" font-family="system-ui, sans-serif" text-anchor="end">100</text>
+        <text x="-10" y="300" fill="#ffffff" font-size="20" font-family="system-ui, sans-serif" text-anchor="end">0</text>
+
+        <!-- Gradient fill under trend line -->
+        {% if habit.trend %}
+        {% set x_scale = 600 / (habit.trend|length - 1) %}
+        <polygon
+            points="{% for value in habit.trend|reverse %}{{ loop.index0 * x_scale }},{{ 300 - (value * 3) }} {% endfor %}600,300 0,300"
+            fill="url(#trendGradient)"
+        />
+
+        <!-- Trend line -->
+        <polyline
+            points="{% for value in habit.trend|reverse %}{{ loop.index0 * x_scale }},{{ 300 - (value * 3) }}{% if not loop.last %} {% endif %}{% endfor %}"
+            fill="none"
+            stroke="rgba(255,255,255,0.85)"
+            stroke-width="5"
+            stroke-linecap="butt"
+            stroke-linejoin="round"
+        />
+        {% endif %}
+    </svg>
+</div>
+
 <button class="edit-habit-btn-bottom" onclick="openEditModal()">Edit Habit</button>
+
+<script>
+function updateTrendPeriod(habitId) {
+    const period = document.getElementById('trendPeriod').value;
+    window.location.href = `/habit/${habitId}?period=${period}`;
+}
+</script>
 {% endblock %}

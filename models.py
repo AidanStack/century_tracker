@@ -440,3 +440,30 @@ def get_habit_100day_history(habit_id: int, end_date: Optional[date] = None) -> 
         history.append(is_complete)
 
     return history
+
+
+def get_habit_trend_data(habit_id: int, end_date: Optional[date] = None, days: int = 100) -> List[int]:
+    """
+    Get the rolling 100-day count for each of the last N days.
+    This shows the trend of the habit score over time.
+
+    Args:
+        habit_id: The ID of the habit
+        end_date: The end date of the window (defaults to today)
+        days: Number of days to include in the trend (default 100)
+
+    Returns:
+        List of integers representing the score on each day (newest first)
+    """
+    if end_date is None:
+        end_date = date.today()
+
+    from datetime import timedelta
+
+    trend = []
+    for days_ago in range(days):
+        check_date = end_date - timedelta(days=days_ago)
+        count = get_habit_100day_count(habit_id, check_date)
+        trend.append(count)
+
+    return trend
