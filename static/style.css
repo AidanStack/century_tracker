@@ -145,7 +145,7 @@ main {
     position: relative;
     transition: all 0.2s;
     flex-shrink: 0;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 .habit-checkbox:checked {
@@ -173,12 +173,18 @@ main {
     margin-bottom: 1.75rem;
 }
 
+.habit-detail-container {
+    max-width: 632.5px;
+    margin: 0 auto;
+    padding: 0;
+}
+
 .habit-detail-title-row {
     display: flex;
+    justify-content: flex-start;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+    gap: calc(0.42rem + 2px);
+    margin-bottom: 1.125rem;
 }
 
 .habit-detail-title-row form {
@@ -188,15 +194,15 @@ main {
 
 .habit-detail-title {
     font-family: 'Lora', serif;
-    font-size: 2.25rem;
+    font-size: 1.5rem;
     font-weight: 400;
-    font-style: normal;
     color: #ffffff;
     opacity: 1;
-    text-align: left;
-    letter-spacing: 0.5px;
-    margin: 0;
+    flex: 1;
+    text-decoration: none;
+    cursor: default;
     line-height: 1;
+    margin: 0;
 }
 
 .back-link {
@@ -261,54 +267,52 @@ main {
 /* Detail page specific layout */
 .detail-count-row {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
+    gap: 2.4rem;
     margin-bottom: 2rem;
 }
 
 .detail-count-display {
-    display: inline-block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+}
+
+.detail-count-display .count-wrapper {
     position: relative;
+    display: inline-block;
 }
 
 .detail-count-main {
-    font-size: 4.5rem;
+    font-size: 4.32rem;
     font-weight: 300;
     color: var(--text-white);
     line-height: 1;
 }
 
 .detail-count-suffix {
-    font-size: 1.125rem;
+    font-size: 1.08rem;
     color: var(--text-light);
     position: absolute;
-    bottom: 0.5rem;
-    margin-left: 0.3rem;
+    bottom: 0.24rem;
+    margin-left: 0.288rem;
 }
 
 .detail-habit-checkbox {
     appearance: none;
     -webkit-appearance: none;
-    width: 30px;
-    height: 30px;
+    width: 30.24px;
+    height: 30.24px;
     cursor: pointer;
     border: 2px solid rgba(255, 255, 255, 0.4);
-    border-radius: 4px;
+    border-radius: 6.048px;
     background-color: transparent;
     position: relative;
     transition: all 0.2s;
-}
-
-.detail-habit-checkbox::before {
-    content: '';
-    position: absolute;
-    left: 8px;
-    top: 3px;
-    width: 6px;
-    height: 12px;
-    border: solid rgba(255, 255, 255, 0.15);
-    border-width: 0 3px 3px 0;
-    transform: rotate(45deg);
+    flex-shrink: 0;
+    margin-top: 2.8px;
 }
 
 .detail-habit-checkbox:checked {
@@ -316,31 +320,28 @@ main {
     border-color: #ffffff;
 }
 
-.detail-habit-checkbox:checked::before {
-    display: none;
-}
-
 .detail-habit-checkbox:checked::after {
     content: '';
     position: absolute;
-    left: 8px;
-    top: 3px;
-    width: 6px;
-    height: 12px;
+    left: 7.56px;
+    top: 3.024px;
+    width: 6.048px;
+    height: 12.096px;
     border: solid var(--dot-filled);
-    border-width: 0 3px 3px 0;
+    border-width: 0 3.024px 3.024px 0;
     transform: rotate(45deg);
 }
 
 .detail-dot-grid {
     display: grid;
-    grid-template-columns: repeat(20, 12.8px);
-    gap: 6.4px;
+    grid-template-columns: repeat(20, 15.552px);
+    gap: 5.184px;
+    margin-left: auto;
 }
 
 .detail-dot {
-    width: 12.8px;
-    height: 12.8px;
+    width: 15.552px;
+    height: 15.552px;
     border-radius: 50%;
     background-color: transparent;
     border: 1px solid #ffffff;
@@ -385,7 +386,7 @@ main {
     font-size: 0.9rem;
     color: var(--text-light);
     position: absolute;
-    bottom: 0.36rem;
+    bottom: 0.2rem;
     margin-left: 0.24rem;
 }
 
