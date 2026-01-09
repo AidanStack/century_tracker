@@ -6,25 +6,33 @@
 {% if habits %}
     {% for habit in habits %}
     <div class="habit-card">
-        <div class="habit-info">
+        <div class="habit-header">
             <div class="habit-name">{{ habit.habit_name }}</div>
-            <div class="habit-count">{{ habit.count }}/100 days</div>
-        </div>
-        <div class="habit-actions">
-            <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="display: inline; margin: 0;">
-                <button type="submit" class="toggle-btn {% if habit.completed_today %}completed{% else %}incomplete{% endif %}">
-                    {% if habit.completed_today %}
-                        Done
-                    {% else %}
-                        Mark
-                    {% endif %}
-                </button>
-            </form>
             <form method="POST" action="{{ url_for('delete_habit_route', habit_id=habit.habit_id) }}"
                   onsubmit="return confirm('Delete {{ habit.habit_name }}? All historical data will be preserved.')"
-                  style="display: inline; margin: 0;">
-                <button type="submit" class="delete-btn">Delete</button>
+                  style="margin: 0;">
+                <button type="submit" class="delete-btn" title="Delete habit">×</button>
             </form>
+        </div>
+
+        <div class="habit-count-display">
+            <span class="count-main">{{ habit.count }}</span>
+            <span class="count-suffix">/100</span>
+        </div>
+
+        <div class="dot-grid">
+            {% for i in range(100) %}
+            <div class="dot {% if i < habit.count %}filled{% endif %}"></div>
+            {% endfor %}
+        </div>
+
+        <div class="toggle-container">
+            <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;">
+                <button type="submit" class="toggle-switch {% if habit.completed_today %}active{% endif %}">
+                    <div class="toggle-slider"></div>
+                </button>
+            </form>
+            <span class="toggle-label">Today</span>
         </div>
     </div>
     {% endfor %}
