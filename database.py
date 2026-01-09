@@ -44,7 +44,7 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS habit_events (
                 event_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 habit_id INTEGER NOT NULL,
-                log_date DATE NOT NULL,
+                log_date DATE,
                 event_type TEXT NOT NULL,
                 event_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (habit_id) REFERENCES habits(habit_id)

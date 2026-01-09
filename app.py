@@ -10,7 +10,8 @@ from models import (
     create_habit,
     mark_habit_complete,
     mark_habit_incomplete,
-    get_habit_date_status
+    get_habit_date_status,
+    delete_habit
 )
 
 
@@ -57,6 +58,13 @@ def toggle_habit(habit_id):
     else:
         mark_habit_complete(habit_id)
 
+    return redirect(url_for('index'))
+
+
+@app.route('/delete-habit/<int:habit_id>', methods=['POST'])
+def delete_habit_route(habit_id):
+    """Delete a habit after confirmation."""
+    delete_habit(habit_id)
     return redirect(url_for('index'))
 
 

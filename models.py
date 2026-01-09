@@ -29,8 +29,15 @@ def create_habit(name: str, display_order: Optional[int] = None) -> Optional[int
             "INSERT INTO habits (habit_name, display_order) VALUES (?, ?)",
             (name, display_order)
         )
-        conn.commit()
         habit_id = cursor.lastrowid
+
+        # Log habit creation event
+        cursor.execute("""
+            INSERT INTO habit_events (habit_id, log_date, event_type)
+            VALUES (?, NULL, 'habit_created')
+        """, (habit_id,))
+
+        conn.commit()
         print(f"Created habit '{name}' with ID {habit_id}")
         return habit_id
 
@@ -103,7 +110,7 @@ def get_habit_by_id(habit_id: int) -> Optional[Dict]:
 
 def delete_habit(habit_id: int) -> bool:
     """
-    Delete a habit (for future use).
+    Delete a habit and log deletion event. Historical event data is preserved.
 
     Args:
         habit_id: The ID of the habit to delete
@@ -115,7 +122,15 @@ def delete_habit(habit_id: int) -> bool:
     cursor = conn.cursor()
 
     try:
+        # Log deletion event BEFORE deleting habit
+        cursor.execute("""
+            INSERT INTO habit_events (habit_id, log_date, event_type)
+            VALUES (?, NULL, 'habit_deleted')
+        """, (habit_id,))
+
+        # Delete habit from table
         cursor.execute("DELETE FROM habits WHERE habit_id = ?", (habit_id,))
+
         conn.commit()
         deleted = cursor.rowcount > 0
         if deleted:
