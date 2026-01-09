@@ -343,3 +343,29 @@ def get_habit_date_status(habit_id: int, log_date: date) -> bool:
 
     finally:
         conn.close()
+
+
+def get_habit_100day_history(habit_id: int, end_date: Optional[date] = None) -> List[bool]:
+    """
+    Get completion status for each of the last 100 days in reverse chronological order.
+    Index 0 = today (or end_date), Index 1 = yesterday, etc.
+
+    Args:
+        habit_id: The ID of the habit
+        end_date: The end date of the window (defaults to today)
+
+    Returns:
+        List of 100 booleans indicating completion status, newest first
+    """
+    if end_date is None:
+        end_date = date.today()
+
+    from datetime import timedelta
+
+    history = []
+    for days_ago in range(100):
+        check_date = end_date - timedelta(days=days_ago)
+        is_complete = get_habit_date_status(habit_id, check_date)
+        history.append(is_complete)
+
+    return history

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="detail-header">
+    <a href="{{ url_for('index') }}" class="back-link">← Back</a>
+    <form method="POST" action="{{ url_for('delete_habit_route', habit_id=habit.habit_id) }}"
+          onsubmit="return confirm('Delete {{ habit.habit_name }}? All historical data will be preserved.')"
+          style="margin: 0;">
+        <button type="submit" class="delete-icon-btn" title="Delete habit">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+        </button>
+    </form>
+</div>
+
+<div class="habit-card">
+    <div class="habit-header">
+        <div class="habit-name-static">{{ habit.habit_name }}</div>
+        <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;">
+            <input type="checkbox"
+                   class="habit-checkbox"
+                   {% if habit.completed_today %}checked{% endif %}
+                   onchange="this.form.submit()">
+        </form>
+    </div>
+
+    <div class="habit-body">
+        <div class="habit-count-display">
+            <span class="count-main">{{ habit.count }}</span>
+            <span class="count-suffix">/100</span>
+        </div>
+
+        <div class="dot-grid">
+            {% for day_completed in habit.history %}
+            <div class="dot {% if day_completed %}filled{% endif %}"></div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -62,19 +62,16 @@ main {
 .habit-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
+    gap: 1rem;
     margin-bottom: 0.75rem;
 }
 
 .habit-body {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     gap: 2rem;
-}
-
-.habit-content {
-    flex: 1;
 }
 
 .habit-toggle {
@@ -88,31 +85,76 @@ main {
     font-weight: 400;
     color: #ffffff;
     opacity: 1;
+    flex: 1;
+    text-decoration: none;
+    cursor: pointer;
 }
 
-/* Delete X button */
-.delete-btn {
+.habit-name:hover {
+    opacity: 0.8;
+}
+
+/* Checkbox */
+.habit-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--dot-filled);
+}
+
+/* Detail page header */
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.back-link {
+    font-family: 'Lora', serif;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.back-link:hover {
+    color: var(--text-white);
+}
+
+.delete-icon-btn {
     background: transparent;
     border: none;
-    color: var(--text-white);
-    font-size: 1.5rem;
     padding: 0;
-    min-width: 24px;
-    min-height: 24px;
     cursor: pointer;
     opacity: 0.6;
     transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
 }
 
-.delete-btn:hover {
+.delete-icon-btn:hover {
     opacity: 1;
+}
+
+.delete-icon-btn svg {
+    display: block;
+}
+
+.habit-name-static {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: #ffffff;
+    opacity: 1;
+    flex: 1;
 }
 
 /* Count display */
 .habit-count-display {
     display: inline-block;
     position: relative;
-    margin-bottom: 1rem;
 }
 
 .count-main {
@@ -133,10 +175,9 @@ main {
 /* Dot grid */
 .dot-grid {
     display: grid;
-    grid-template-columns: repeat(20, 1fr);
+    grid-template-columns: repeat(20, 10px);
     gap: 4px;
-    max-width: 440px;
-    margin-bottom: 1rem;
+    margin-left: auto;
 }
 
 .dot {
@@ -200,26 +241,26 @@ main {
 /* Add habit button */
 .add-habit-btn {
     font-family: 'Lora', serif;
+    font-style: italic;
     background-color: transparent;
-    border: 1px solid rgba(255,255,255,0.2);
+    border: none;
     color: #e6e6e6;
     padding: 0.75rem 1.5rem;
-    border-radius: 8px;
     margin-top: 2rem;
     margin-bottom: 2rem;
     font-size: 1rem;
     cursor: pointer;
-    text-decoration: none;
+    text-decoration: underline;
     display: block;
     text-align: center;
     width: fit-content;
     margin-left: auto;
     margin-right: auto;
-    transition: background-color 0.2s;
+    transition: opacity 0.2s;
 }
 
 .add-habit-btn:hover {
-    background-color: rgba(255,255,255,0.05);
+    opacity: 0.7;
 }
 
 /* Empty state */
@@ -239,22 +280,18 @@ form {
 }
 
 /* Add habit page */
-.form-container {
-    background: rgba(255,255,255,0.03);
-    border-radius: 12px;
-    padding: 2rem;
-    border: 1px solid rgba(255,255,255,0.1);
-}
-
 label {
+    font-family: 'Lora', serif;
     display: block;
     font-weight: 400;
     margin-bottom: 0.5rem;
-    color: var(--text-white);
-    font-size: 0.875rem;
+    color: #ffffff;
+    opacity: 1;
+    font-size: 1rem;
 }
 
 input[type="text"] {
+    font-family: 'Lora', serif;
     width: 100%;
     min-height: 44px;
     padding: 0.75rem;
@@ -262,7 +299,8 @@ input[type="text"] {
     background-color: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.2);
     border-radius: 8px;
-    color: var(--text-white);
+    color: #ffffff;
+    opacity: 1;
     margin-bottom: 1.5rem;
 }
 
@@ -284,6 +322,7 @@ input[type="text"]::placeholder {
 
 .form-actions button,
 .form-actions .btn {
+    font-family: 'Lora', serif;
     flex: 1;
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
@@ -294,11 +333,12 @@ input[type="text"]::placeholder {
     display: inline-block;
     text-align: center;
     transition: all 0.2s;
+    color: #ffffff;
+    opacity: 1;
 }
 
 .btn-primary {
     background-color: var(--dot-filled);
-    color: white;
     border-color: var(--dot-filled);
 }
 
@@ -308,7 +348,6 @@ input[type="text"]::placeholder {
 
 .btn-secondary {
     background-color: transparent;
-    color: var(--text-white);
 }
 
 .btn-secondary:hover {

@@ -11,7 +11,8 @@ from models import (
     mark_habit_complete,
     mark_habit_incomplete,
     get_habit_date_status,
-    delete_habit
+    delete_habit,
+    get_habit_100day_history
 )
 
 
@@ -29,9 +30,10 @@ def index():
     stats = get_habit_stats_all()
     today = date.today()
 
-    # For each habit, check if it's already marked complete today
+    # For each habit, check if it's already marked complete today and get daily history
     for stat in stats:
         stat['completed_today'] = get_habit_date_status(stat['habit_id'], today)
+        stat['history'] = get_habit_100day_history(stat['habit_id'], today)
 
     return render_template('index.html', habits=stats)
 
@@ -59,6 +61,22 @@ def toggle_habit(habit_id):
         mark_habit_complete(habit_id)
 
     return redirect(url_for('index'))
+
+
+@app.route('/habit/<int:habit_id>')
+def habit_detail(habit_id):
+    """Display habit detail page."""
+    stats = get_habit_stats_all()
+    habit = next((h for h in stats if h['habit_id'] == habit_id), None)
+
+    if not habit:
+        return redirect(url_for('index'))
+
+    today = date.today()
+    habit['completed_today'] = get_habit_date_status(habit_id, today)
+    habit['history'] = get_habit_100day_history(habit_id, today)
+
+    return render_template('habit_detail.html', habit=habit)
 
 
 @app.route('/delete-habit/<int:habit_id>', methods=['POST'])

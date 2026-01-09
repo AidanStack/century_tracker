@@ -5,37 +5,25 @@
     {% for habit in habits %}
     <div class="habit-card">
         <div class="habit-header">
-            <div class="habit-name">{{ habit.habit_name }}</div>
-            <form method="POST" action="{{ url_for('delete_habit_route', habit_id=habit.habit_id) }}"
-                  onsubmit="return confirm('Delete {{ habit.habit_name }}? All historical data will be preserved.')"
-                  style="margin: 0;">
-                <button type="submit" class="delete-btn" title="Delete habit">×</button>
+            <a href="{{ url_for('habit_detail', habit_id=habit.habit_id) }}" class="habit-name">{{ habit.habit_name }}</a>
+            <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;">
+                <input type="checkbox"
+                       class="habit-checkbox"
+                       {% if habit.completed_today %}checked{% endif %}
+                       onchange="this.form.submit()">
             </form>
         </div>
 
         <div class="habit-body">
-            <div class="habit-content">
-                <div class="habit-count-display">
-                    <span class="count-main">{{ habit.count }}</span>
-                    <span class="count-suffix">/100</span>
-                </div>
-
-                <div class="dot-grid">
-                    {% for i in range(100) %}
-                    <div class="dot {% if i < habit.count %}filled{% endif %}"></div>
-                    {% endfor %}
-                </div>
+            <div class="habit-count-display">
+                <span class="count-main">{{ habit.count }}</span>
+                <span class="count-suffix">/100</span>
             </div>
 
-            <div class="habit-toggle">
-                <div class="toggle-container">
-                    <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;">
-                        <button type="submit" class="toggle-switch {% if habit.completed_today %}active{% endif %}">
-                            <div class="toggle-slider"></div>
-                        </button>
-                    </form>
-                    <span class="toggle-label">Today</span>
-                </div>
+            <div class="dot-grid">
+                {% for day_completed in habit.history %}
+                <div class="dot {% if day_completed %}filled{% endif %}"></div>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -46,5 +34,5 @@
     </div>
 {% endif %}
 
-<a href="{{ url_for('add_habit') }}" class="btn add-habit-btn">Add New Habit</a>
+<a href="{{ url_for('add_habit') }}" class="btn add-habit-btn">Add a Habit</a>
 {% endblock %}
