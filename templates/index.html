@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-<a href="{{ url_for('add_habit') }}" class="btn add-habit-btn">+ Add New Habit</a>
-
 {% if habits %}
     {% for habit in habits %}
     <div class="habit-card">
@@ -45,7 +43,8 @@
 {% else %}
     <div class="empty-state">
         <p>No habits yet!</p>
-        <p>Click "Add New Habit" to get started.</p>
     </div>
 {% endif %}
+
+<a href="{{ url_for('add_habit') }}" class="btn add-habit-btn">Add New Habit</a>
 {% endblock %}

@@ -199,16 +199,22 @@ main {
 
 /* Add habit button */
 .add-habit-btn {
+    font-family: 'Lora', serif;
     background-color: transparent;
     border: 1px solid rgba(255,255,255,0.2);
-    color: var(--text-white);
+    color: #e6e6e6;
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
+    margin-top: 2rem;
     margin-bottom: 2rem;
     font-size: 1rem;
     cursor: pointer;
     text-decoration: none;
-    display: inline-block;
+    display: block;
+    text-align: center;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
     transition: background-color 0.2s;
 }
 
