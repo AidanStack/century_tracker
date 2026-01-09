@@ -3,7 +3,7 @@
 {% block content %}
 {% if habits %}
     {% for habit in habits %}
-    <div class="habit-card">
+    <div class="habit-card" draggable="true" data-habit-id="{{ habit.habit_id }}">
         <div class="habit-header">
             <a href="{{ url_for('habit_detail', habit_id=habit.habit_id) }}" class="habit-name">{{ habit.habit_name }}</a>
             <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;" onsubmit="return false;">
@@ -16,8 +16,10 @@
 
         <div class="habit-body">
             <div class="habit-count-display">
-                <span class="count-main">{{ habit.count }}</span>
-                <span class="count-suffix">/100</span>
+                <div class="count-wrapper">
+                    <span class="count-main">{{ habit.count }}</span>
+                    <span class="count-suffix">/100</span>
+                </div>
             </div>
 
             <div class="dot-grid">
@@ -72,6 +74,90 @@ function toggleHabit(habitId, checkbox) {
         checkbox.checked = !checkbox.checked;
         alert('Failed to update habit. Please try again.');
     });
+}
+
+// Drag and drop functionality
+let draggedElement = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const habitCards = document.querySelectorAll('.habit-card');
+
+    habitCards.forEach(card => {
+        card.addEventListener('dragstart', handleDragStart);
+        card.addEventListener('dragover', handleDragOver);
+        card.addEventListener('drop', handleDrop);
+        card.addEventListener('dragend', handleDragEnd);
+    });
+});
+
+function handleDragStart(e) {
+    draggedElement = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+
+    const afterElement = getDragAfterElement(this.parentNode, e.clientY);
+    if (afterElement == null) {
+        this.parentNode.appendChild(draggedElement);
+    } else {
+        this.parentNode.insertBefore(draggedElement, afterElement);
+    }
+
+    return false;
+}
+
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+    return false;
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+
+    // Get the new order of habit IDs
+    const habitCards = document.querySelectorAll('.habit-card');
+    const habitIds = Array.from(habitCards).map(card => card.dataset.habitId);
+
+    // Save the new order to the backend
+    fetch('/reorder-habits', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ habit_ids: habitIds })
+    })
+    .then(response => {
+        if (!response.ok) {
+            alert('Failed to save habit order. Please refresh the page.');
+        }
+    })
+    .catch(error => {
+        alert('Failed to save habit order. Please refresh the page.');
+    });
+}
+
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.habit-card:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 </script>
 {% endblock %}

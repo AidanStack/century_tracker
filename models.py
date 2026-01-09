@@ -144,6 +144,41 @@ def rename_habit(habit_id: int, new_name: str) -> bool:
         conn.close()
 
 
+def update_habit_order(habit_ids: List[int]) -> bool:
+    """
+    Update the display order of habits.
+
+    Args:
+        habit_ids: List of habit IDs in the desired order
+
+    Returns:
+        True if updated successfully, False otherwise
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Update display_order for each habit based on position in list
+        for index, habit_id in enumerate(habit_ids):
+            cursor.execute("""
+                UPDATE habits
+                SET display_order = ?
+                WHERE habit_id = ?
+            """, (index, habit_id))
+
+        conn.commit()
+        print(f"Updated order for {len(habit_ids)} habits")
+        return True
+
+    except sqlite3.Error as e:
+        print(f"Error updating habit order: {e}")
+        conn.rollback()
+        return False
+
+    finally:
+        conn.close()
+
+
 def delete_habit(habit_id: int) -> bool:
     """
     Delete a habit and log deletion event. Historical event data is preserved.

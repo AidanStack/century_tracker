@@ -9,9 +9,11 @@ A minimal habit tracking app using a rolling 100-day window. Users log daily hab
 - First time using Claude Code to build an app
 
 ## Tech Stack
-- Python (primary language)
-- SQLITE for backend (at first hosted locally)
-- Future: Web interface and iphone app 
+- **Backend**: Python with Flask web framework
+- **Database**: SQLite (locally hosted)
+- **Frontend**: HTML templates (Jinja2), CSS, vanilla JavaScript
+- **Fonts**: Lora (serif) for headings, System fonts for numbers/UI
+- Future: iPhone app 
 
 ## Project Requirements
 - **Initial version should be VERY SIMPLE**
@@ -104,6 +106,52 @@ FROM latest_events
 WHERE rn = 1 AND event_type = 'mark_complete';
 ```
 
+## Current Implementation Status
+
+### Frontend Features (Implemented)
+- **Dark minimalist theme** with glass morphism UI effects
+- **Main page** ("Last 100"):
+  - Title at top
+  - Habit cards with glass panel effect on hover
+  - Each card shows: checkbox, habit name, count/100, and 100-dot visualization grid
+  - Dots represent last 100 days (leftmost = today, chronological order)
+  - Drag-and-drop to reorder habits
+  - "Add a Habit" button with hover effects
+- **Habit detail page**:
+  - Back button and habit name (left-aligned)
+  - Large count display (/100) with checkbox
+  - Centered, enlarged dot grid (16px dots)
+  - Edit Habit button at bottom
+- **Edit modal**:
+  - Rename habit
+  - Delete habit (with confirmation)
+  - Close button (X) in top-right corner
+- **Live updates**: Checkbox toggles update count and dot grid without page refresh (AJAX)
+- **Responsive design**: Works on mobile and desktop
+
+### Backend Features (Implemented)
+- **Flask web server** running on port 5001
+- **SQLite database** with event-based logging system
+- **API endpoints**:
+  - `/` - Home page with all habits
+  - `/add-habit` - Add new habit
+  - `/toggle-habit/<id>` - Toggle habit completion (AJAX-compatible)
+  - `/habit/<id>` - Habit detail page
+  - `/rename-habit/<id>` - Rename habit
+  - `/delete-habit/<id>` - Delete habit
+  - `/reorder-habits` - Save drag-and-drop order
+- **Core functions** (models.py):
+  - Event-based habit tracking (immutable log)
+  - 100-day rolling window calculations
+  - Habit CRUD operations
+  - Display order persistence
+
+### UI/UX Design Elements
+- **Glass morphism**: Subtle frosted glass panels on hover
+- **Color scheme**: Dark green theme (#1a2e1a background, white text/dots)
+- **Typography**: Lora italic for titles, system fonts for numbers
+- **Interactions**: Smooth transitions, hover effects, drag-and-drop
+
 ## Future Features (Post-V1)
 
 ### Habit Initialization Options
@@ -122,3 +170,14 @@ WHERE rn = 1 AND event_type = 'mark_complete';
 - Long-press app icon to see quick action menu
 - Display first 3 habits from homepage
 - Tap to instantly log completion for that day (add +1)
+
+### AI-Powered Screenshot Data Entry
+- Upload screenshot of habit tracking data from previous days
+- Use AI API call to automatically parse and fill in historical completion data
+- Streamlines bulk data entry when migrating from other tracking methods
+
+### Daily Score System
+- Calculate overall daily score (e.g., 6/8 if you completed 6 out of 8 tracked habits)
+- Display aggregate score at top of main screen
+- Show daily score history in dot grid or numerical format
+- Track overall consistency across all habits

@@ -2,7 +2,7 @@
 Century Tracker - Flask application entry point.
 Web interface for habit tracking with rolling 100-day window.
 """
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from datetime import date
 from database import init_db
 from models import (
@@ -13,7 +13,8 @@ from models import (
     get_habit_date_status,
     delete_habit,
     get_habit_100day_history,
-    rename_habit
+    rename_habit,
+    update_habit_order
 )
 
 
@@ -99,6 +100,29 @@ def delete_habit_route(habit_id):
     """Delete a habit after confirmation."""
     delete_habit(habit_id)
     return redirect(url_for('index'))
+
+
+@app.route('/reorder-habits', methods=['POST'])
+def reorder_habits():
+    """Update the display order of habits."""
+    data = request.get_json()
+    habit_ids = data.get('habit_ids', [])
+
+    if not habit_ids:
+        return jsonify({'error': 'No habit IDs provided'}), 400
+
+    # Convert string IDs to integers
+    try:
+        habit_ids = [int(id) for id in habit_ids]
+    except ValueError:
+        return jsonify({'error': 'Invalid habit IDs'}), 400
+
+    success = update_habit_order(habit_ids)
+
+    if success:
+        return jsonify({'success': True}), 200
+    else:
+        return jsonify({'error': 'Failed to update order'}), 500
 
 
 if __name__ == '__main__':

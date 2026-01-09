@@ -71,10 +71,9 @@ function toggleHabit(habitId, checkbox) {
             alert('Failed to update habit. Please try again.');
         } else {
             // Update the UI after successful toggle
-            const habitCard = checkbox.closest('.habit-card');
-            const countElement = habitCard.querySelector('.count-main');
-            const dotGrid = habitCard.querySelector('.dot-grid');
-            const firstDot = dotGrid.querySelector('.dot:first-child');
+            const countElement = document.querySelector('.detail-count-main');
+            const dotGrid = document.querySelector('.detail-dot-grid');
+            const firstDot = dotGrid.querySelector('.detail-dot:first-child');
 
             // Update the count
             let currentCount = parseInt(countElement.textContent);
@@ -95,29 +94,24 @@ function toggleHabit(habitId, checkbox) {
 }
 </script>
 
-<div class="habit-card">
-    <div class="habit-header">
-        <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;" onsubmit="return false;">
-            <input type="hidden" name="next" value="{{ url_for('habit_detail', habit_id=habit.habit_id) }}">
-            <input type="checkbox"
-                   class="habit-checkbox"
-                   {% if habit.completed_today %}checked{% endif %}
-                   onchange="toggleHabit({{ habit.habit_id }}, this)">
-        </form>
+<div class="detail-count-row">
+    <div class="detail-count-display">
+        <span class="detail-count-main">{{ habit.count }}</span>
+        <span class="detail-count-suffix">/100</span>
     </div>
+    <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;" onsubmit="return false;">
+        <input type="hidden" name="next" value="{{ url_for('habit_detail', habit_id=habit.habit_id) }}">
+        <input type="checkbox"
+               class="detail-habit-checkbox"
+               {% if habit.completed_today %}checked{% endif %}
+               onchange="toggleHabit({{ habit.habit_id }}, this)">
+    </form>
+</div>
 
-    <div class="habit-body">
-        <div class="habit-count-display">
-            <span class="count-main">{{ habit.count }}</span>
-            <span class="count-suffix">/100</span>
-        </div>
-
-        <div class="dot-grid">
-            {% for day_completed in habit.history %}
-            <div class="dot {% if day_completed %}filled{% endif %}"></div>
-            {% endfor %}
-        </div>
-    </div>
+<div class="detail-dot-grid">
+    {% for day_completed in habit.history %}
+    <div class="detail-dot {% if day_completed %}filled{% endif %}"></div>
+    {% endfor %}
 </div>
 
 <button class="edit-habit-btn-bottom" onclick="openEditModal()">Edit Habit</button>
