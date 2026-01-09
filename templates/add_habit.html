@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('add_habit') }}">
+    <label for="habit_name">Habit Name</label>
+    <input
+        type="text"
+        id="habit_name"
+        name="habit_name"
+        placeholder="e.g., Exercise, Read, Meditate"
+        required
+        autofocus
+    >
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Add Habit</button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}

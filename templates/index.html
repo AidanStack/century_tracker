@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<a href="{{ url_for('add_habit') }}" class="btn add-habit-btn">+ Add New Habit</a>
+
+{% if habits %}
+    {% for habit in habits %}
+    <div class="habit-card">
+        <div class="habit-info">
+            <div class="habit-name">{{ habit.habit_name }}</div>
+            <div class="habit-count">{{ habit.count }}/100 days</div>
+        </div>
+        <form method="POST" action="{{ url_for('toggle_habit', habit_id=habit.habit_id) }}" style="margin: 0;">
+            <button type="submit" class="toggle-btn {% if habit.completed_today %}completed{% else %}incomplete{% endif %}">
+                {% if habit.completed_today %}
+                    Done
+                {% else %}
+                    Mark
+                {% endif %}
+            </button>
+        </form>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="empty-state">
+        <p>No habits yet!</p>
+        <p>Click "Add New Habit" to get started.</p>
+    </div>
+{% endif %}
+{% endblock %}
