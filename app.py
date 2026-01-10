@@ -92,6 +92,40 @@ def habit_detail(habit_id):
     habit['trend'] = get_habit_trend_data(habit_id, today, period)
     habit['trend_period'] = period
 
+    # Calculate month labels for x-axis (3-4 labels)
+    from datetime import timedelta
+    month_labels = []
+    num_labels = 4
+    step = period // (num_labels - 1)
+
+    # Check if date range includes dates outside current year
+    oldest_date = today - timedelta(days=period - 1)
+    include_year = oldest_date.year != today.year
+
+    # Add padding to prevent labels from appearing at edges
+    padding = 40
+    usable_width = 600 - (2 * padding)
+
+    for i in range(num_labels):
+        days_ago = period - 1 - (i * step)
+        if days_ago < 0:
+            days_ago = 0
+        label_date = today - timedelta(days=days_ago)
+        x_position = padding + (i * step) * (usable_width / (period - 1))
+
+        # Format label with year if needed
+        if include_year:
+            label_text = label_date.strftime('%b %y')
+        else:
+            label_text = label_date.strftime('%b')
+
+        month_labels.append({
+            'label': label_text,
+            'x': x_position
+        })
+
+    habit['month_labels'] = month_labels
+
     return render_template('habit_detail.html', habit=habit)
 
 

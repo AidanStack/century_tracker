@@ -132,7 +132,7 @@ function toggleHabit(habitId, checkbox) {
         </select>
         <span class="trend-title-text">Day Trend</span>
     </div>
-    <svg class="trend-graph" viewBox="-40 0 640 300" preserveAspectRatio="xMidYMid meet">
+    <svg class="trend-graph" viewBox="-40 0 640 350" preserveAspectRatio="xMidYMid meet">
         <!-- Define gradient -->
         <defs>
             <linearGradient id="trendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -148,8 +148,8 @@ function toggleHabit(habitId, checkbox) {
         <line x1="0" y1="300" x2="600" y2="300" stroke="rgba(255,255,255,0.5)" stroke-width="4"/>
 
         <!-- Y-axis labels -->
-        <text x="-10" y="20" fill="#ffffff" font-size="20" font-family="system-ui, sans-serif" text-anchor="end">100</text>
-        <text x="-10" y="300" fill="#ffffff" font-size="20" font-family="system-ui, sans-serif" text-anchor="end">0</text>
+        <text x="-10" y="20" fill="#ffffff" font-size="20" font-family="Lora, serif" text-anchor="end" opacity="0.7">100</text>
+        <text x="-10" y="300" fill="#ffffff" font-size="20" font-family="Lora, serif" text-anchor="end" opacity="0.7">0</text>
 
         <!-- Gradient fill under trend line -->
         {% if habit.trend %}
@@ -164,11 +164,16 @@ function toggleHabit(habitId, checkbox) {
             points="{% for value in habit.trend|reverse %}{{ loop.index0 * x_scale }},{{ 300 - (value * 3) }}{% if not loop.last %} {% endif %}{% endfor %}"
             fill="none"
             stroke="rgba(255,255,255,0.85)"
-            stroke-width="5"
+            stroke-width="3"
             stroke-linecap="butt"
             stroke-linejoin="round"
         />
         {% endif %}
+
+        <!-- X-axis month labels -->
+        {% for month_label in habit.month_labels %}
+        <text x="{{ month_label.x }}" y="325" fill="#ffffff" font-size="16" font-family="Lora, serif" text-anchor="middle" opacity="0.7">{{ month_label.label }}</text>
+        {% endfor %}
     </svg>
 </div>
 
