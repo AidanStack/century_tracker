@@ -4,7 +4,7 @@ Web interface for habit tracking with rolling 100-day window.
 """
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from datetime import date
+from datetime import date, datetime
 import os
 from database import init_db
 from models import (
@@ -188,6 +188,88 @@ def toggle_habit(habit_id):
         return redirect(next_url)
 
     return redirect(url_for('index'))
+
+
+@app.route('/toggle-habit/<int:habit_id>/date', methods=['POST'])
+@login_required
+def toggle_habit_date(habit_id):
+    """Toggle habit completion for a specific date."""
+    # Verify ownership
+    if not verify_habit_ownership(habit_id, current_user.id):
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    # Get date from POST data
+    data = request.get_json()
+    date_str = data.get('date')  # Format: YYYY-MM-DD
+
+    try:
+        log_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({'error': 'Invalid date format'}), 400
+
+    # Check if date is within 2-year window
+    today = date.today()
+    days_ago = (today - log_date).days
+    if days_ago < 0 or days_ago >= 730:  # 2 years = ~730 days
+        return jsonify({'error': 'Date out of range. Only the last 2 years can be edited.'}), 400
+
+    # Toggle the date
+    is_complete = get_habit_date_status(habit_id, log_date)
+    if is_complete:
+        mark_habit_incomplete(habit_id, log_date)
+    else:
+        mark_habit_complete(habit_id, log_date)
+
+    # Get updated data
+    new_status = not is_complete
+    stats = get_habit_stats_all(current_user.id)
+    habit = next((h for h in stats if h['habit_id'] == habit_id), None)
+
+    # Get trend period from query parameter (default 100)
+    period = request.args.get('period', 100, type=int)
+    if period not in [100, 200, 300, 365, 400, 500]:
+        period = 100
+
+    # Get trend data
+    trend_data = get_habit_trend_data(habit_id, today, period)
+
+    # Calculate month labels for x-axis
+    from datetime import timedelta
+    month_labels = []
+    num_labels = 4
+    step = period // (num_labels - 1)
+
+    oldest_date = today - timedelta(days=period - 1)
+    include_year = oldest_date.year != today.year
+
+    padding = 40
+    usable_width = 600 - (2 * padding)
+
+    for i in range(num_labels):
+        days_ago = period - 1 - (i * step)
+        if days_ago < 0:
+            days_ago = 0
+        label_date = today - timedelta(days=days_ago)
+        x_position = padding + (i * step) * (usable_width / (period - 1))
+
+        if include_year:
+            label_text = label_date.strftime('%b %y')
+        else:
+            label_text = label_date.strftime('%b')
+
+        month_labels.append({
+            'label': label_text,
+            'x': x_position
+        })
+
+    return jsonify({
+        'success': True,
+        'new_status': new_status,
+        'new_count': habit['count'] if habit else 0,
+        'updated_history': get_habit_100day_history(habit_id, today),
+        'trend': trend_data,
+        'month_labels': month_labels
+    })
 
 
 @app.route('/habit/<int:habit_id>')

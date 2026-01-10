@@ -26,9 +26,9 @@
 
 <!-- Edit Modal -->
 <div id="editModal" class="modal" onclick="closeModalOnBackdrop(event)">
-    <div class="modal-content">
+    <div class="modal-content modal-content-wide" onclick="event.stopPropagation()">
         <button type="button" class="modal-close" onclick="closeEditModal()">×</button>
-        <form method="POST" action="{{ url_for('rename_habit_route', habit_id=habit.habit_id) }}">
+        <form id="renameForm" method="POST" action="{{ url_for('rename_habit_route', habit_id=habit.habit_id) }}">
             <label for="habit_name">Habit Name</label>
             <input
                 type="text"
@@ -37,12 +37,44 @@
                 value="{{ habit.habit_name }}"
                 required
                 autofocus
+                onblur="saveHabitName()"
             >
-
-            <div class="modal-actions">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-            </div>
         </form>
+
+        <!-- Historical Date Editor -->
+        <div class="history-editor-section">
+            <h3 class="history-editor-title">Edit Habit History</h3>
+
+            <!-- Calendar Navigation Controls -->
+            <div class="calendar-nav">
+                <button type="button" class="calendar-nav-btn" onclick="prevMonth()">‹</button>
+
+                <div class="calendar-nav-selects">
+                    <select id="calendarMonth" class="calendar-select" onchange="updateCalendar()">
+                        <!-- Populated by JavaScript -->
+                    </select>
+                    <select id="calendarYear" class="calendar-select" onchange="updateCalendar()">
+                        <!-- Populated by JavaScript -->
+                    </select>
+                </div>
+
+                <button type="button" class="calendar-nav-btn" onclick="nextMonth()">›</button>
+            </div>
+
+            <!-- Calendar Grid -->
+            <div class="calendar-wrapper">
+                <!-- Day of week headers -->
+                <div class="calendar-weekdays">
+                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span>
+                    <span>Thu</span><span>Fri</span><span>Sat</span>
+                </div>
+
+                <!-- Calendar days grid (populated by JavaScript) -->
+                <div id="calendarGrid" class="calendar-grid">
+                    <!-- Days will be dynamically generated -->
+                </div>
+            </div>
+        </div>
 
         <div class="delete-section">
             <form method="POST" action="{{ url_for('delete_habit_route', habit_id=habit.habit_id) }}"
@@ -54,16 +86,342 @@
 </div>
 
 <script>
+let originalHabitName = '';
+let currentHabitId = null;
+let currentViewDate = null;  // Date object for calendar view
+let habitHistory = [];  // Store 100-day history from server
+
 function openEditModal() {
-    document.getElementById('editModal').style.display = 'flex';
+    const modal = document.getElementById('editModal');
+    modal.style.display = 'flex';
+
+    // Store original habit name
+    const habitInput = document.getElementById('habit_name');
+    originalHabitName = habitInput.value;
+
+    // Store habit ID for calendar
+    currentHabitId = {{ habit.habit_id }};
+
+    // Store habit history (last 100 days, index 0 = today)
+    habitHistory = {{ habit.history|tojson }};
+
+    // Initialize calendar to current month
+    currentViewDate = new Date();
+
+    // Populate month/year dropdowns
+    populateMonthDropdown();
+    populateYearDropdown();
+
+    // Render initial calendar
+    renderCalendar();
+}
+
+// Populate month dropdown (0-11)
+function populateMonthDropdown() {
+    const select = document.getElementById('calendarMonth');
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+
+    select.innerHTML = months.map((month, i) =>
+        `<option value="${i}" ${i === currentViewDate.getMonth() ? 'selected' : ''}>${month}</option>`
+    ).join('');
+}
+
+// Populate year dropdown (current year down to 2 years ago)
+function populateYearDropdown() {
+    const select = document.getElementById('calendarYear');
+    const currentYear = new Date().getFullYear();
+    const years = [];
+
+    for (let year = currentYear; year >= currentYear - 2; year--) {
+        years.push(year);
+    }
+
+    select.innerHTML = years.map(year =>
+        `<option value="${year}" ${year === currentViewDate.getFullYear() ? 'selected' : ''}>${year}</option>`
+    ).join('');
+}
+
+// Navigate to previous month
+function prevMonth() {
+    currentViewDate.setMonth(currentViewDate.getMonth() - 1);
+
+    // Update dropdowns
+    document.getElementById('calendarMonth').value = currentViewDate.getMonth();
+    document.getElementById('calendarYear').value = currentViewDate.getFullYear();
+
+    renderCalendar();
+}
+
+// Navigate to next month
+function nextMonth() {
+    const today = new Date();
+
+    // Don't allow navigating past current month
+    if (currentViewDate.getFullYear() === today.getFullYear() &&
+        currentViewDate.getMonth() === today.getMonth()) {
+        return;
+    }
+
+    currentViewDate.setMonth(currentViewDate.getMonth() + 1);
+
+    // Update dropdowns
+    document.getElementById('calendarMonth').value = currentViewDate.getMonth();
+    document.getElementById('calendarYear').value = currentViewDate.getFullYear();
+
+    renderCalendar();
+}
+
+// Update calendar when dropdown changes
+function updateCalendar() {
+    const month = parseInt(document.getElementById('calendarMonth').value);
+    const year = parseInt(document.getElementById('calendarYear').value);
+
+    currentViewDate = new Date(year, month, 1);
+    renderCalendar();
+}
+
+// Render the calendar grid for current month
+function renderCalendar() {
+    const grid = document.getElementById('calendarGrid');
+    const year = currentViewDate.getFullYear();
+    const month = currentViewDate.getMonth();
+
+    // Get first day of month and number of days
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    // Get today's date for comparison
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Get 2 years ago date for validation
+    const twoYearsAgo = new Date();
+    twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+
+    // Clear grid
+    grid.innerHTML = '';
+
+    // Add empty cells for days before month starts
+    for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'calendar-day empty';
+        grid.appendChild(emptyCell);
+    }
+
+    // Add day cells
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dateStr = date.toISOString().split('T')[0];
+
+        const dayCell = document.createElement('div');
+        dayCell.className = 'calendar-day';
+
+        // Check if date is in the future
+        if (date > today) {
+            dayCell.classList.add('future');
+            dayCell.textContent = day;
+        }
+        // Check if date is older than 2 years
+        else if (date < twoYearsAgo) {
+            dayCell.classList.add('disabled');
+            dayCell.textContent = day;
+        }
+        // Clickable date
+        else {
+            dayCell.textContent = day;
+            dayCell.dataset.date = dateStr;
+
+            // Check completion status from habit history
+            const isComplete = checkDateStatus(date);
+            if (isComplete) {
+                dayCell.classList.add('complete');
+            } else {
+                dayCell.classList.add('incomplete');
+            }
+
+            // Add click handler
+            dayCell.onclick = () => toggleCalendarDate(dateStr, dayCell);
+        }
+
+        grid.appendChild(dayCell);
+    }
+}
+
+// Check if a date is completed (uses habit history for last 100 days)
+function checkDateStatus(date) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Calculate days ago from today
+    const daysAgo = Math.floor((today - date) / (1000 * 60 * 60 * 24));
+
+    // If within 100-day history window, check the array
+    if (daysAgo >= 0 && daysAgo < habitHistory.length) {
+        return habitHistory[daysAgo];
+    }
+
+    // For dates outside the 100-day window, assume incomplete
+    return false;
+}
+
+// Toggle completion for a calendar date
+function toggleCalendarDate(dateStr, dayCell) {
+    if (dayCell.classList.contains('future') || dayCell.classList.contains('disabled')) {
+        return;  // Can't edit future or too-old dates
+    }
+
+    // Optimistic UI update
+    const wasComplete = dayCell.classList.contains('complete');
+
+    if (wasComplete) {
+        dayCell.classList.remove('complete');
+        dayCell.classList.add('incomplete');
+    } else {
+        dayCell.classList.remove('incomplete');
+        dayCell.classList.add('complete');
+    }
+
+    // Get current trend period
+    const trendPeriod = document.getElementById('trendPeriod').value;
+
+    // Send AJAX request (reuse existing endpoint)
+    fetch(`/toggle-habit/${currentHabitId}/date?period=${trendPeriod}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ date: dateStr })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            // Revert optimistic update on error
+            if (wasComplete) {
+                dayCell.classList.add('complete');
+                dayCell.classList.remove('incomplete');
+            } else {
+                dayCell.classList.remove('complete');
+                dayCell.classList.add('incomplete');
+            }
+            alert('Failed to update habit. Please try again.');
+            return;
+        }
+
+        // Update local habit history array with new data from server
+        habitHistory = data.updated_history;
+
+        // Update the detail page count display
+        const countElement = document.querySelector('.detail-count-main');
+        if (countElement) {
+            countElement.textContent = data.new_count;
+        }
+
+        // Update the detail page dot grid (outside modal)
+        const detailDots = document.querySelectorAll('.detail-dot-grid .detail-dot');
+        data.updated_history.forEach((completed, index) => {
+            if (detailDots[index]) {
+                if (completed) {
+                    detailDots[index].classList.add('filled');
+                } else {
+                    detailDots[index].classList.remove('filled');
+                }
+            }
+        });
+
+        // Update the trend graph
+        if (data.trend && data.month_labels) {
+            updateTrendGraph(data.trend, data.month_labels);
+        }
+    })
+    .catch(error => {
+        // Revert optimistic update on error
+        if (wasComplete) {
+            dayCell.classList.add('complete');
+            dayCell.classList.remove('incomplete');
+        } else {
+            dayCell.classList.remove('complete');
+            dayCell.classList.add('incomplete');
+        }
+        alert('Failed to update habit. Please try again.');
+    });
+}
+
+// Update the trend graph with new data
+function updateTrendGraph(trendData, monthLabels) {
+    const svg = document.getElementById('trendGraph');
+    if (!svg || !trendData || trendData.length === 0) return;
+
+    // Calculate x scale
+    const x_scale = 600 / (trendData.length - 1);
+
+    // Reverse the trend data (same as Jinja template does)
+    const reversedTrend = trendData.slice().reverse();
+
+    // Build polygon points for gradient fill
+    let polygonPoints = '';
+    reversedTrend.forEach((value, index) => {
+        polygonPoints += `${index * x_scale},${300 - (value * 3)} `;
+    });
+    polygonPoints += '600,300 0,300';
+
+    // Build polyline points for trend line
+    let polylinePoints = '';
+    reversedTrend.forEach((value, index) => {
+        if (index > 0) polylinePoints += ' ';
+        polylinePoints += `${index * x_scale},${300 - (value * 3)}`;
+    });
+
+    // Find and update polygon
+    const polygon = svg.querySelector('polygon');
+    if (polygon) {
+        polygon.setAttribute('points', polygonPoints);
+    }
+
+    // Find and update polyline
+    const polyline = svg.querySelector('polyline');
+    if (polyline) {
+        polyline.setAttribute('points', polylinePoints);
+    }
+
+    // Update month labels
+    const existingLabels = svg.querySelectorAll('text[y="325"]');
+    existingLabels.forEach(label => label.remove());
+
+    monthLabels.forEach(labelData => {
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', labelData.x);
+        text.setAttribute('y', '325');
+        text.setAttribute('fill', '#ffffff');
+        text.setAttribute('font-size', '16');
+        text.setAttribute('font-family', 'Lora, serif');
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('opacity', '0.7');
+        text.textContent = labelData.label;
+        svg.appendChild(text);
+    });
 }
 
 function closeEditModal() {
+    // Save habit name if it changed before closing
+    saveHabitName();
     document.getElementById('editModal').style.display = 'none';
 }
 
+function saveHabitName() {
+    const habitInput = document.getElementById('habit_name');
+    const newName = habitInput.value.trim();
+
+    // Only submit if name changed and is not empty
+    if (newName && newName !== originalHabitName) {
+        originalHabitName = newName;
+        document.getElementById('renameForm').submit();
+    }
+}
+
 function closeModalOnBackdrop(event) {
-    if (event.target.id === 'editModal') {
+    // Only close if clicking directly on the modal backdrop, not its children
+    if (event.target === event.currentTarget) {
         closeEditModal();
     }
 }
@@ -133,7 +491,7 @@ function toggleHabit(habitId, checkbox) {
         </select>
         <span class="trend-title-text">Day Trend</span>
     </div>
-    <svg class="trend-graph" viewBox="-40 0 640 350" preserveAspectRatio="xMidYMid meet">
+    <svg id="trendGraph" class="trend-graph" viewBox="-40 0 640 350" preserveAspectRatio="xMidYMid meet">
         <!-- Define gradient -->
         <defs>
             <linearGradient id="trendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
