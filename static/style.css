@@ -41,6 +41,7 @@ header h1 {
     opacity: 1;
     text-align: center;
     letter-spacing: 0.5px;
+    transition: opacity 0.1s ease-in-out;
 }
 
 main {
@@ -168,7 +169,7 @@ main {
 /* Detail page header */
 .detail-header {
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 1.75rem;
 }
@@ -218,22 +219,18 @@ main {
 
 .edit-habit-btn {
     font-family: 'Lora', serif;
-    font-style: italic;
     background: transparent;
     border: none;
     padding: 0;
     cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.4);
+    transition: color 0.2s;
     font-size: 1rem;
+    text-decoration: none;
 }
 
 .edit-habit-btn:hover {
-    opacity: 1;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .edit-habit-btn-bottom {
@@ -577,7 +574,7 @@ input[type="text"] {
     padding: 0.75rem;
     font-size: 16px;
     background-color: transparent;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 0.5px solid rgba(255, 255, 255, 0.7);
     border-radius: 8px;
     color: #ffffff;
     opacity: 1;
@@ -597,13 +594,14 @@ input[type="text"]::placeholder {
 
 .form-actions {
     display: flex;
+    justify-content: center;
     gap: 0.75rem;
 }
 
 .form-actions button,
 .form-actions .btn {
     font-family: 'Lora', serif;
-    flex: 1;
+    width: 33%;
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
     font-size: 1rem;
@@ -618,12 +616,14 @@ input[type="text"]::placeholder {
 }
 
 .btn-primary {
-    background-color: var(--dot-filled);
-    border-color: var(--dot-filled);
+    background-color: #ffffff;
+    border: none;
+    color: #1a2e1a !important;
 }
 
 .btn-primary:hover {
-    background-color: #5a9269;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #1a2e1a !important;
 }
 
 .btn-secondary {
@@ -805,7 +805,7 @@ input[type="text"]::placeholder {
     max-width: 400px;
     margin: 2rem auto;
     padding: 2rem;
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: transparent;
     border-radius: 12px;
 }
 
@@ -825,7 +825,7 @@ input[type="text"]::placeholder {
     padding: 0.75rem;
     font-size: 16px;
     background-color: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 0.5px solid rgba(255, 255, 255, 0.7);
     border-radius: 8px;
     color: #ffffff;
     margin-bottom: 1.5rem;
@@ -848,6 +848,7 @@ input[type="text"]::placeholder {
 }
 
 .auth-footer p {
+    font-family: 'Lora', serif;
     color: var(--text-light);
     font-size: 0.9rem;
 }
@@ -886,29 +887,75 @@ input[type="text"]::placeholder {
     border: 1px solid rgba(255, 68, 68, 0.4);
 }
 
-/* User info in header */
-.user-info {
+/* Hamburger menu in header */
+.hamburger-menu {
+    position: absolute;
+    top: 1.25rem;
+    right: 1rem;
+}
+
+.hamburger-icon {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 0.5rem;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 1001;
 }
 
-.username {
-    font-family: 'Lora', serif;
-    font-size: 0.9rem;
-    color: var(--text-light);
+.hamburger-icon span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.4);
+    transition: all 0.3s;
 }
 
-.logout-link {
+.hamburger-icon:hover span {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background-color: rgba(35, 61, 35, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    min-width: 160px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    z-index: 1000;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
     font-family: 'Lora', serif;
-    font-size: 0.9rem;
-    color: var(--text-light);
+    display: block;
+    padding: 0.75rem 1.25rem;
+    color: #ffffff;
     text-decoration: none;
-    transition: color 0.2s;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
 }
 
-.logout-link:hover {
-    color: var(--text-white);
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.9);
 }

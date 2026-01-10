@@ -13,12 +13,36 @@
     <header>
         <h1>Last 100</h1>
         {% if current_user.is_authenticated %}
-        <div class="user-info">
-            <span class="username">{{ current_user.username }}</span>
-            <a href="{{ url_for('logout') }}" class="logout-link">Log out</a>
+        <div class="hamburger-menu">
+            <button class="hamburger-icon" onclick="toggleMenu()" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <a href="#" class="dropdown-item">Settings</a>
+                <a href="{{ url_for('logout') }}" class="dropdown-item">Log out</a>
+            </div>
         </div>
         {% endif %}
     </header>
+
+    <script>
+    function toggleMenu() {
+        const dropdown = document.getElementById('dropdownMenu');
+        dropdown.classList.toggle('show');
+    }
+
+    // Close dropdown when clicking outside
+    window.onclick = function(event) {
+        if (!event.target.matches('.hamburger-icon') && !event.target.matches('.hamburger-icon span')) {
+            const dropdown = document.getElementById('dropdownMenu');
+            if (dropdown && dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        }
+    }
+    </script>
     <main>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}

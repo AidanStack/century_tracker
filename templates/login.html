@@ -1,16 +1,75 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="auth-container">
-    <h2>Log In</h2>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const header = document.querySelector('header h1');
+    if (!header) return;
 
+    // Name list to cycle through - exactly 50 names
+    const names = [
+        "Alex", "Emma", "Liam", "Mia", "Noah", "Ava", "Luna", "Jack", "Maya", "Zoe",
+        "Leo", "Ella", "Ryan", "Lily", "Adam", "Ruby", "Cole", "Ivy", "Owen", "Sara",
+        "Max", "Rose", "Ben", "Amy", "Sam", "Kate", "Jay", "Eve", "Ian", "Nora",
+        "Luke", "Chloe", "Ezra", "Leah", "Finn", "Iris", "Dean", "Lucy", "Joel", "Jade",
+        "Kyle", "Mila", "Theo", "Aria", "Jude", "Nina", "Mark", "Zara", "Paul", "Your"
+    ];
+
+    let currentIndex = 0;
+
+    // Set initial structure immediately to prevent jump
+    header.innerHTML = '<div style="width: 450px; margin: 0 auto; background-color: transparent; display: flex; position: relative; transform: translateX(-40px);">' +
+                       '<div style="flex: 1; text-align: right; padding-right: 15px;"><span style="opacity: 1;">Your</span></div>' +
+                       '<div style="flex: 1; text-align: left; padding-left: 0;"> Last 100</div>' +
+                       '</div>';
+
+    // Calculate interval duration based on progress (creates deceleration)
+    function getInterval(index) {
+        // Start at moderate speed (90ms), slow down at end (320ms max)
+        const minInterval = 90;
+        const maxInterval = 320;
+        const progress = index / (names.length - 1);
+        // Use power of 3 for more gradual slowdown at end
+        return minInterval + (maxInterval - minInterval) * Math.pow(progress, 3);
+    }
+
+    function cycleName() {
+        // Create fixed-width container with two vertical lines
+        const possessive = (names[currentIndex] === "Your") ? "" : "'s";
+
+        // Calculate opacity fade from 0 to 1 for name and 's only
+        const opacity = currentIndex / (names.length - 1);
+
+        // Layout: names right-aligned with padding, "Last 100" left-aligned
+        header.innerHTML = '<div style="width: 450px; margin: 0 auto; background-color: transparent; display: flex; position: relative; transform: translateX(-40px);">' +
+                          '<div style="flex: 1; text-align: right; padding-right: 15px;"><span style="opacity: ' + opacity + ';">' + names[currentIndex] + possessive + '</span></div>' +
+                          '<div style="flex: 1; text-align: left; padding-left: 0;"> Last 100</div>' +
+                          '</div>';
+
+        // Stop if we've reached the last name
+        if (currentIndex >= names.length - 1) {
+            return;
+        }
+
+        // Move to next name
+        currentIndex++;
+
+        // Schedule next cycle with increasing interval (deceleration)
+        const nextInterval = getInterval(currentIndex);
+        setTimeout(cycleName, nextInterval);
+    }
+
+    // Start animation after brief delay
+    setTimeout(cycleName, 200);
+});
+</script>
+<div class="auth-container">
     <form method="POST" action="{{ url_for('login') }}">
         <label for="username">Username</label>
         <input
             type="text"
             id="username"
             name="username"
-            placeholder="Enter your username"
             required
             autofocus
             autocomplete="username"
@@ -21,7 +80,6 @@
             type="password"
             id="password"
             name="password"
-            placeholder="Enter your password"
             required
             autocomplete="current-password"
         >

@@ -9,6 +9,7 @@
 
 <div class="detail-header">
     <a href="{{ url_for('index') }}" class="back-link">← Back</a>
+    <button class="edit-habit-btn" onclick="openEditModal()">Edit Habit</button>
 </div>
 
 <div class="habit-detail-container">
@@ -176,8 +177,6 @@ function toggleHabit(habitId, checkbox) {
         {% endfor %}
     </svg>
 </div>
-
-<button class="edit-habit-btn-bottom" onclick="openEditModal()">Edit Habit</button>
 
 <script>
 function updateTrendPeriod(habitId) {

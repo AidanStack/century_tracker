@@ -32,6 +32,7 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-i
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'  # Redirect to login page if not authenticated
+login_manager.login_message = None  # Disable "Please log in to access this page" message
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -132,7 +133,6 @@ def login():
 def logout():
     """Log out current user."""
     logout_user()
-    flash('You have been logged out.', 'success')
     return redirect(url_for('login'))
 
 
