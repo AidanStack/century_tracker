@@ -23,19 +23,31 @@ def get_db_connection() -> sqlite3.Connection:
 def init_db() -> None:
     """
     Initialize the database schema.
-    Creates the habits and habit_events tables if they don't exist.
+    Creates the users, habits and habit_events tables if they don't exist.
     """
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        # Create habits table
+        # Create users table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL,
+                date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # Create habits table (with user_id foreign key)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS habits (
                 habit_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
                 habit_name TEXT NOT NULL,
                 date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                display_order INTEGER
+                display_order INTEGER,
+                FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
             )
         """)
 
@@ -52,7 +64,7 @@ def init_db() -> None:
         """)
 
         conn.commit()
-        print("Database initialized successfully")
+        print("Database initialized successfully with user authentication")
 
     except sqlite3.Error as e:
         print(f"Error initializing database: {e}")

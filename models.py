@@ -10,11 +10,12 @@ from database import get_db_connection
 
 # ==================== Habit Management ====================
 
-def create_habit(name: str, display_order: Optional[int] = None) -> Optional[int]:
+def create_habit(user_id: int, name: str, display_order: Optional[int] = None) -> Optional[int]:
     """
-    Create a new habit.
+    Create a new habit for a specific user.
 
     Args:
+        user_id: The ID of the user creating the habit
         name: Name of the habit (e.g., "Exercise", "Read")
         display_order: Optional order for displaying on homepage
 
@@ -26,8 +27,8 @@ def create_habit(name: str, display_order: Optional[int] = None) -> Optional[int
 
     try:
         cursor.execute(
-            "INSERT INTO habits (habit_name, display_order) VALUES (?, ?)",
-            (name, display_order)
+            "INSERT INTO habits (user_id, habit_name, display_order) VALUES (?, ?, ?)",
+            (user_id, name, display_order)
         )
         habit_id = cursor.lastrowid
 
@@ -38,7 +39,7 @@ def create_habit(name: str, display_order: Optional[int] = None) -> Optional[int
         """, (habit_id,))
 
         conn.commit()
-        print(f"Created habit '{name}' with ID {habit_id}")
+        print(f"Created habit '{name}' with ID {habit_id} for user {user_id}")
         return habit_id
 
     except sqlite3.Error as e:
@@ -50,9 +51,12 @@ def create_habit(name: str, display_order: Optional[int] = None) -> Optional[int
         conn.close()
 
 
-def get_all_habits() -> List[Dict]:
+def get_all_habits(user_id: int) -> List[Dict]:
     """
-    Get all habits ordered by display_order.
+    Get all habits for a specific user ordered by display_order.
+
+    Args:
+        user_id: The ID of the user whose habits to fetch
 
     Returns:
         List of habit dictionaries with keys: habit_id, habit_name, date_created, display_order
@@ -64,8 +68,9 @@ def get_all_habits() -> List[Dict]:
         cursor.execute("""
             SELECT habit_id, habit_name, date_created, display_order
             FROM habits
+            WHERE user_id = ?
             ORDER BY display_order, habit_id
-        """)
+        """, (user_id,))
         rows = cursor.fetchall()
         habits = [dict(row) for row in rows]
         return habits
@@ -351,15 +356,18 @@ def get_habit_100day_count(habit_id: int, end_date: Optional[date] = None) -> in
         conn.close()
 
 
-def get_habit_stats_all() -> List[Dict]:
+def get_habit_stats_all(user_id: int) -> List[Dict]:
     """
-    Get 100-day completion counts for all habits.
+    Get 100-day completion counts for all habits belonging to a user.
     Ordered by display_order for homepage display.
+
+    Args:
+        user_id: The ID of the user whose stats to fetch
 
     Returns:
         List of dictionaries with keys: habit_id, habit_name, count, display_order
     """
-    habits = get_all_habits()
+    habits = get_all_habits(user_id)
     stats = []
 
     for habit in habits:
@@ -467,3 +475,38 @@ def get_habit_trend_data(habit_id: int, end_date: Optional[date] = None, days: i
         trend.append(count)
 
     return trend
+
+
+def verify_habit_ownership(habit_id: int, user_id: int) -> bool:
+    """
+    Verify that a habit belongs to a specific user.
+    Critical for preventing unauthorized access to other users' habits.
+
+    Args:
+        habit_id: The ID of the habit to verify
+        user_id: The ID of the user claiming ownership
+
+    Returns:
+        True if the habit belongs to the user, False otherwise
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT user_id
+            FROM habits
+            WHERE habit_id = ?
+        """, (habit_id,))
+        result = cursor.fetchone()
+
+        if result:
+            return result['user_id'] == user_id
+        return False
+
+    except sqlite3.Error as e:
+        print(f"Error verifying habit ownership: {e}")
+        return False
+
+    finally:
+        conn.close()

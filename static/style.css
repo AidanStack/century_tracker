@@ -799,3 +799,116 @@ input[type="text"]::placeholder {
         font-size: 3.5rem;
     }
 }
+
+/* Authentication styles */
+.auth-container {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+}
+
+.auth-container h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.auth-container input[type="password"] {
+    font-family: 'Lora', serif;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.75rem;
+    font-size: 16px;
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+}
+
+.auth-container input[type="password"]:focus {
+    outline: none;
+    border-color: var(--dot-filled);
+    background-color: transparent;
+}
+
+.auth-container input[type="password"]::placeholder {
+    color: var(--text-light);
+    opacity: 0.6;
+}
+
+.auth-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.auth-footer p {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.auth-footer a {
+    color: var(--dot-filled);
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Flash messages */
+.flash-messages {
+    max-width: 632.5px;
+    margin: 0 auto 1rem;
+}
+
+.flash-message {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.flash-success {
+    background-color: rgba(74, 124, 89, 0.2);
+    color: #a8d5ba;
+    border: 1px solid rgba(74, 124, 89, 0.4);
+}
+
+.flash-error {
+    background-color: rgba(255, 68, 68, 0.2);
+    color: #ffaaaa;
+    border: 1px solid rgba(255, 68, 68, 0.4);
+}
+
+/* User info in header */
+.user-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.username {
+    font-family: 'Lora', serif;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.logout-link {
+    font-family: 'Lora', serif;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.logout-link:hover {
+    color: var(--text-white);
+}

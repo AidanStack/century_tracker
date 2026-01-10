@@ -2,8 +2,10 @@
 Century Tracker - Flask application entry point.
 Web interface for habit tracking with rolling 100-day window.
 """
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from datetime import date
+import os
 from database import init_db
 from models import (
     get_habit_stats_all,
@@ -15,22 +17,132 @@ from models import (
     get_habit_100day_history,
     get_habit_trend_data,
     rename_habit,
-    update_habit_order
+    update_habit_order,
+    verify_habit_ownership
 )
+from auth import User, create_user, get_user_by_username, get_user_by_id, verify_password
 
 
 app = Flask(__name__)
 
+# Secret key for session management (CRITICAL for production)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+
+# Flask-Login setup
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'  # Redirect to login page if not authenticated
+
+@login_manager.user_loader
+def load_user(user_id):
+    """Required by Flask-Login to reload user from session"""
+    return get_user_by_id(int(user_id))
 
 # Initialize database on startup
 with app.app_context():
     init_db()
 
 
+# ==================== Authentication Routes ====================
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    """User registration page."""
+    # Redirect if already logged in
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        password_confirm = request.form.get('password_confirm', '')
+
+        # Validation
+        if not username or not password:
+            flash('Username and password are required.', 'error')
+            return render_template('signup.html')
+
+        if len(username) < 3:
+            flash('Username must be at least 3 characters.', 'error')
+            return render_template('signup.html')
+
+        if len(password) < 8:
+            flash('Password must be at least 8 characters.', 'error')
+            return render_template('signup.html')
+
+        if password != password_confirm:
+            flash('Passwords do not match.', 'error')
+            return render_template('signup.html')
+
+        # Check if username exists
+        existing_user = get_user_by_username(username)
+        if existing_user:
+            flash('Username already taken.', 'error')
+            return render_template('signup.html')
+
+        # Create user
+        user_id = create_user(username, password)
+        if user_id:
+            # Auto-login after signup
+            user = get_user_by_id(user_id)
+            login_user(user)
+            flash('Account created successfully!', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Error creating account. Please try again.', 'error')
+            return render_template('signup.html')
+
+    return render_template('signup.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """User login page."""
+    # Redirect if already logged in
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+
+        if not username or not password:
+            flash('Please enter both username and password.', 'error')
+            return render_template('login.html')
+
+        # Verify credentials
+        user = get_user_by_username(username)
+        if user and verify_password(user, password):
+            login_user(user)
+
+            # Redirect to 'next' page if provided, otherwise home
+            next_page = request.args.get('next')
+            if next_page and next_page.startswith('/'):
+                return redirect(next_page)
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid username or password.', 'error')
+            return render_template('login.html')
+
+    return render_template('login.html')
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    """Log out current user."""
+    logout_user()
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('login'))
+
+
+# ==================== Habit Routes ====================
+
 @app.route('/')
+@login_required
 def index():
     """Home page - display all habits with their 100-day counts."""
-    stats = get_habit_stats_all()
+    stats = get_habit_stats_all(current_user.id)
     today = date.today()
 
     # For each habit, check if it's already marked complete today and get daily history
@@ -42,19 +154,26 @@ def index():
 
 
 @app.route('/add-habit', methods=['GET', 'POST'])
+@login_required
 def add_habit():
     """Add new habit form."""
     if request.method == 'POST':
         habit_name = request.form.get('habit_name')
         if habit_name:
-            create_habit(habit_name)
+            create_habit(current_user.id, habit_name)
             return redirect(url_for('index'))
     return render_template('add_habit.html')
 
 
 @app.route('/toggle-habit/<int:habit_id>', methods=['POST'])
+@login_required
 def toggle_habit(habit_id):
     """Toggle habit completion for today."""
+    # Verify user owns this habit
+    if not verify_habit_ownership(habit_id, current_user.id):
+        flash('You do not have access to that habit.', 'error')
+        return redirect(url_for('index'))
+
     today = date.today()
     is_complete = get_habit_date_status(habit_id, today)
 
@@ -72,9 +191,15 @@ def toggle_habit(habit_id):
 
 
 @app.route('/habit/<int:habit_id>')
+@login_required
 def habit_detail(habit_id):
     """Display habit detail page."""
-    stats = get_habit_stats_all()
+    # Verify user owns this habit
+    if not verify_habit_ownership(habit_id, current_user.id):
+        flash('You do not have access to that habit.', 'error')
+        return redirect(url_for('index'))
+
+    stats = get_habit_stats_all(current_user.id)
     habit = next((h for h in stats if h['habit_id'] == habit_id), None)
 
     if not habit:
@@ -130,8 +255,14 @@ def habit_detail(habit_id):
 
 
 @app.route('/rename-habit/<int:habit_id>', methods=['POST'])
+@login_required
 def rename_habit_route(habit_id):
     """Rename a habit."""
+    # Verify user owns this habit
+    if not verify_habit_ownership(habit_id, current_user.id):
+        flash('You do not have access to that habit.', 'error')
+        return redirect(url_for('index'))
+
     new_name = request.form.get('habit_name')
     if new_name:
         rename_habit(habit_id, new_name)
@@ -139,13 +270,20 @@ def rename_habit_route(habit_id):
 
 
 @app.route('/delete-habit/<int:habit_id>', methods=['POST'])
+@login_required
 def delete_habit_route(habit_id):
     """Delete a habit after confirmation."""
+    # Verify user owns this habit
+    if not verify_habit_ownership(habit_id, current_user.id):
+        flash('You do not have access to that habit.', 'error')
+        return redirect(url_for('index'))
+
     delete_habit(habit_id)
     return redirect(url_for('index'))
 
 
 @app.route('/reorder-habits', methods=['POST'])
+@login_required
 def reorder_habits():
     """Update the display order of habits."""
     data = request.get_json()
@@ -159,6 +297,11 @@ def reorder_habits():
         habit_ids = [int(id) for id in habit_ids]
     except ValueError:
         return jsonify({'error': 'Invalid habit IDs'}), 400
+
+    # Verify all habits belong to current user
+    for habit_id in habit_ids:
+        if not verify_habit_ownership(habit_id, current_user.id):
+            return jsonify({'error': 'Unauthorized'}), 403
 
     success = update_habit_order(habit_ids)
 
