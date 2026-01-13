@@ -1,7 +1,11 @@
 # Database files
 *.db
+*.db.backup
 *.sqlite
 *.sqlite3
+
+# Logs
+*.log
 
 # Python
 __pycache__/
